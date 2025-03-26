@@ -1,7 +1,7 @@
 const usersRepository = require('./users-repository');
 
-async function getUsers(offset = 0, limit = 10) {
-  return usersRepository.getUsers().skip(offset).limit(limit);
+async function getUsers(offset, limit) {
+  return usersRepository.getUsers(offset, limit);
 }
 
 async function getUser(id) {

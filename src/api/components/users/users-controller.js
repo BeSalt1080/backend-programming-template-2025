@@ -8,10 +8,7 @@ async function getUsers(request, response, next) {
   const { offset, limit } = request.query;
 
   try {
-    const users = await usersService.getUsers({
-      offset: Number(offset),
-      limit: Number(limit),
-    });
+    const users = await usersService.getUsers(offset, limit);
 
     return response.status(200).json(users);
   } catch (error) {
@@ -190,7 +187,7 @@ async function changePassword(request, response, next) {
       );
     }
 
-    const hashedNewPassword = hashPassword(newPassword);
+    const hashedNewPassword = await hashPassword(newPassword);
 
     const success = await authenticationService.changePassword(
       id,

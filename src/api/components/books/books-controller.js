@@ -2,8 +2,9 @@ const booksService = require('./books-service');
 const { errorResponder, errorTypes } = require('../../../core/errors');
 
 async function getBooks(request, response, next) {
+  const { offset, limit } = request.query;
   try {
-    const books = await booksService.getBooks();
+    const books = await booksService.getBooks(offset, limit);
 
     return response.status(200).json(books);
   } catch (error) {
@@ -27,7 +28,73 @@ async function createBook(request, response, next) {
   }
 }
 
+async function getBook(request, response, next) {
+  try {
+    const book = await booksService.getBook(request.params.id);
+
+    if (!book) {
+      throw errorResponder(errorTypes.UNPROCESSABLE_ENTITY, 'Book not found');
+    }
+
+    return response.status(200).json(book);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function updateBook(request, response, next) {
+  try {
+    const { title } = request.body;
+    const book = await booksService.getBook(request.params.id);
+
+    if (!book) {
+      throw errorResponder(errorTypes.UNPROCESSABLE_ENTITY, 'Book not found');
+    }
+
+    if (!title) {
+      throw errorResponder(errorTypes.VALIDATION_ERROR, 'Title is required');
+    }
+
+    const success = await booksService.updateBook(request.params.id, title);
+
+    if (!success) {
+      throw errorResponder(
+        errorTypes.UNPROCESSABLE_ENTITY,
+        'Failed to update book'
+      );
+    }
+
+    return response.status(200).json({ message: 'Book updated successfully' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function deleteBook(request, response, next) {
+  try {
+    const { id } = request.params;
+    if (!id) {
+      throw errorResponder(errorTypes.VALIDATION_ERROR, 'id is required');
+    }
+    const success = await booksService.deleteBook(id);
+
+    if (!success) {
+      throw errorResponder(
+        errorTypes.UNPROCESSABLE_ENTITY,
+        'Failed to delete book'
+      );
+    }
+
+    return response.status(200).json({ message: 'Book deleted successfully' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getBooks,
   createBook,
+  getBook,
+  updateBook,
+  deleteBook,
 };
